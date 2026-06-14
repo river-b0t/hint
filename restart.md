@@ -2,7 +2,56 @@
 
 Quick reference for picking up where you left off.
 
-**Last Updated:** January 14, 2026 (Early AM)
+**Last Updated:** June 13, 2026
+
+---
+
+## ⚠️ FIRST: Bring the backend back online
+
+The Supabase project (`whbqyxtjmbordcjtqyoq`) has likely been **paused** (free tier
+auto-pauses after ~7 days idle). Nothing in the app works until it's restored. Do
+this before any other work.
+
+### Step 1 — Restore the project
+1. Open the Supabase dashboard → project `whbqyxtjmbordcjtqyoq`.
+2. If it shows **Paused**, click **Restore** and wait for it to come back up.
+3. **If it shows "deleted" / missing → STOP.** The authoritative schema lives
+   only in the cloud, not in this repo (base `lists`/`products`/`friends`/`users`
+   DDL + RLS and several RPCs are not committed). A deleted project cannot be
+   rebuilt from this repo alone.
+4. The anon key is valid until 2036 — no key rotation needed just to reconnect.
+
+### Step 2 — Snapshot the live schema into the repo (closes the gap above)
+```bash
+supabase link --project-ref whbqyxtjmbordcjtqyoq
+supabase db dump --schema public > supabase/schema.sql
+```
+Commit `supabase/schema.sql`. Confirm `lists`/`products` have tenant-scoped RLS.
+
+### Step 3 — Apply the security migration (branch: fix/share-visibility-leaks, PR #1)
+`supabase/migrations/20260613_fix_share_visibility_leaks.sql` fixes the
+share/visibility leaks (owner could see who claimed gifts; anon email harvest via
+leaderboard tables). Apply via the SQL Editor or `supabase db push` **after** Step 2
+so it can be verified against the real base-table RLS.
+
+### Step 4 — Reconcile + apply the draft hardening (after Step 2)
+`supabase/drafts/20260614_harden_points_and_claims.DRAFT.sql` — run the VERIFY
+blocks inside it first (award_points signature, leaderboard email usage,
+guest_claim_product signature, the claim RPC name mismatch), then promote it into
+`supabase/migrations/` and apply.
+
+### Step 5 — Deploy the edge functions (never deployed)
+Set function secrets first (`ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`), then:
+```bash
+supabase functions deploy send-notification
+supabase functions deploy check-price-alerts
+supabase functions deploy check-due-date-reminders
+```
+
+### Step 6 — Mobile build env
+Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ONESIGNAL_APP_ID` before EAS builds
+(`hint-mobile-test/app.config.js`). Mobile reads these from env (not hardcoded).
 
 ---
 

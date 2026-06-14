@@ -89,7 +89,6 @@ async function handleUnclaim(token, productId) {
       <p>Are you sure you want to unclaim this item?</p>
       <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
         <strong>${product.name}</strong>
-        <p style="color: #666; font-size: 14px; margin: 5px 0 0;">Claimed by: ${product.guest_claimer_name}</p>
       </div>
       <p style="color: #666; font-size: 14px;">This will make the item available for others to claim again.</p>
       <div style="display: flex; gap: 10px; margin-top: 20px;">
