@@ -2,7 +2,7 @@
 
 Quick reference for picking up where you left off.
 
-**Last Updated:** June 13, 2026
+**Last Updated:** June 14, 2026
 
 ---
 
@@ -28,11 +28,16 @@ supabase db dump --schema public > supabase/schema.sql
 ```
 Commit `supabase/schema.sql`. Confirm `lists`/`products` have tenant-scoped RLS.
 
-### Step 3 — Apply the security migration (branch: fix/share-visibility-leaks, PR #1)
+### Step 3 — Apply the security migration (✅ merged to main — PR #1, commit e99a9c9)
 `supabase/migrations/20260613_fix_share_visibility_leaks.sql` fixes the
 share/visibility leaks (owner could see who claimed gifts; anon email harvest via
-leaderboard tables). Apply via the SQL Editor or `supabase db push` **after** Step 2
-so it can be verified against the real base-table RLS.
+leaderboard tables). **Code is merged but NOT yet applied to the database.** Apply
+via the SQL Editor or `supabase db push` **after** Step 2 so it can be verified
+against the real base-table RLS.
+
+After applying, also redeploy the **web viewer** (GitHub Pages) so the updated
+`is_claimed` filter ships, and rebuild the **extension + mobile** apps to pick up
+the client-side claim-privacy fixes (also merged in PR #1).
 
 ### Step 4 — Reconcile + apply the draft hardening (after Step 2)
 `supabase/drafts/20260614_harden_points_and_claims.DRAFT.sql` — run the VERIFY
