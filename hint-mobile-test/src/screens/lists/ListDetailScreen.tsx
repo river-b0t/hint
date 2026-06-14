@@ -262,10 +262,11 @@ export default function ListDetailScreen({ route, navigation }: ListsScreenProps
               </View>
 
               {/* Claim Status Badge */}
+              {/* Never reveal the claimer's identity on the owner's own list — it spoils the surprise. */}
               {isProductClaimed && (
                 <View style={[styles.claimedBadge, { backgroundColor: theme.colors.primaryContainer }]}>
                   <Text variant="labelMedium" style={{ color: theme.colors.onPrimaryContainer }}>
-                    ✓ Claimed{selectedProduct.guest_claimer_name ? ` by ${selectedProduct.guest_claimer_name}` : ''}
+                    ✓ Claimed
                   </Text>
                 </View>
               )}

@@ -389,21 +389,17 @@ export async function toggleListNotifications(id, level) {
 
 // Export list to Excel (CSV format)
 export function exportListToExcel(list, products) {
-  const headers = ['Product Name', 'URL', 'Claimed', 'Claimed By', 'Date Added', 'Current Price'];
+  // Claimer identity is intentionally omitted to preserve the "secret claim" model —
+  // the owner can see that an item is claimed, but never who claimed it.
+  const headers = ['Product Name', 'URL', 'Claimed', 'Date Added', 'Current Price'];
   const rows = [headers];
 
   products.forEach(product => {
-    // Determine who claimed the product
-    let claimedBy = '';
-    if (product.claimed_by) {
-      claimedBy = product.guest_claimer_name || product.guest_claimer_email || 'A friend';
-    }
-
+    const isClaimed = product.claimed_by || product.guest_claimer_email;
     const row = [
       product.name || '',
       product.url || '',
-      product.claimed_by ? 'Yes' : 'No',
-      claimedBy,
+      isClaimed ? 'Yes' : 'No',
       product.created_at ? new Date(product.created_at).toLocaleDateString() : '',
       product.current_price ? `$${product.current_price}` : 'N/A'
     ];
