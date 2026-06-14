@@ -126,7 +126,12 @@ REVOKE SELECT, INSERT, UPDATE, DELETE ON user_stats     FROM anon, authenticated
 
 -- award_points takes arbitrary (p_user_id, p_points, ...) — must not be
 -- callable by unauthenticated clients. Keep it for authenticated callers only.
-REVOKE EXECUTE ON FUNCTION award_points FROM anon;
+-- NB: CREATE FUNCTION grants EXECUTE to PUBLIC by default, so revoking only
+-- `anon` leaves the PUBLIC grant and anon retains access. Revoke PUBLIC, then
+-- re-grant explicitly to the roles that should keep it (authenticated clients +
+-- service role) so we don't depend on the default PUBLIC grant.
+REVOKE EXECUTE ON FUNCTION award_points FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION award_points TO authenticated, service_role;
 -- NOTE (follow-up, not done here to avoid an untested signature change):
 -- award_points still trusts its params, so a logged-in user can still forge
 -- points for themselves or others. Harden it to require
@@ -139,8 +144,10 @@ REVOKE EXECUTE ON FUNCTION award_points FROM anon;
 -- reachable by anon/authenticated clients — only the service role (used by
 -- the check-price-alerts edge function) should call it.
 -- -----------------------------------------------------
-REVOKE EXECUTE ON FUNCTION check_price_alerts() FROM anon, authenticated;
--- (service_role retains EXECUTE by default; the edge function uses it.)
+-- Revoke PUBLIC too (default grant), then re-grant only to service_role so the
+-- check-price-alerts edge function (which uses the service role key) still works.
+REVOKE EXECUTE ON FUNCTION check_price_alerts() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION check_price_alerts() TO service_role;
 
 
 -- =====================================================

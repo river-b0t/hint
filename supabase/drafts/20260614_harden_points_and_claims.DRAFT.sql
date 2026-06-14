@@ -122,7 +122,9 @@ END;
 $$;
 
 -- Keep migration-1's grant posture (authenticated + service role; not anon).
-REVOKE EXECUTE ON FUNCTION award_points FROM anon;
+-- Revoke PUBLIC (default grant) too, then re-grant the allowed roles explicitly.
+REVOKE EXECUTE ON FUNCTION award_points FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION award_points TO authenticated, service_role;
 
 
 -- =====================================================

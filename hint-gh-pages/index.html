@@ -706,8 +706,9 @@
       // Update header
       document.getElementById('hintlistName').textContent = currentList.name;
 
-      // Filter out claimed items
-      const availableProducts = currentProducts.filter(p => !p.claimed_by && !p.guest_claimer_email);
+      // Filter out claimed items. get_public_hintlist returns only `is_claimed`
+      // (no claimer fields); the direct-REST fallback returns claimed_by/guest_claimer_email.
+      const availableProducts = currentProducts.filter(p => !p.is_claimed && !p.claimed_by && !p.guest_claimer_email);
 
       document.getElementById('itemCount').textContent = `${availableProducts.length} available items`;
 
